@@ -13,8 +13,8 @@ Local tickets (no GitHub issues). Implement only the **frontier** (blockers done
 | 05 | [History search & filters](.scratch/expense-tracker-core/issues/05-history-filters.md) | 04 | done |
 | 06 | [Monthly budget](.scratch/expense-tracker-core/issues/06-monthly-budget.md) | 04 | done |
 | 07 | [Dashboard overview](.scratch/expense-tracker-core/issues/07-dashboard.md) | 04, 06 | done |
-| 08 | [UX + Playwright e2e](.scratch/expense-tracker-core/issues/08-e2e-hardening.md) | 05, 07 | ready |
+| 08 | [UX + Playwright e2e](.scratch/expense-tracker-core/issues/08-e2e-hardening.md) | 05, 07 | done |
 
-**Frontier now:** `08` only.
+**Frontier now:** none — feature drop complete. Next: code-review + security-review, then draft PR if asked.
 
 **Parallel after 04:** `05` and `06` may run together; then `07`; then `08`.

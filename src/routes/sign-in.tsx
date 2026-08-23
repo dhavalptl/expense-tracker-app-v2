@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 
@@ -17,21 +17,44 @@ export const Route = createFileRoute('/sign-in')({
   component: SignInPage,
 })
 
+function formatClientError(err: unknown): string {
+  if (!(err instanceof Error)) {
+    return 'Could not sign in'
+  }
+  try {
+    const parsed = JSON.parse(err.message) as Array<{ message?: string }>
+    if (Array.isArray(parsed) && parsed[0]?.message) {
+      return parsed[0].message
+    }
+  } catch {
+    // not JSON
+  }
+  return err.message || 'Could not sign in'
+}
+
 function SignInPage() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
+  const [ready, setReady] = useState(false)
 
-  async function onSubmit(event: React.FormEvent) {
-    event.preventDefault()
+  useEffect(() => {
+    setReady(true)
+  }, [])
+
+  async function onContinue() {
     setError(null)
     setPending(true)
+    const input = document.getElementById('email') as HTMLInputElement | null
+    const email = input?.value.trim() ?? ''
     try {
+      if (!email) {
+        throw new Error('Email is required')
+      }
       await signInWithEmail({ data: { email } })
       await router.navigate({ to: '/' })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not sign in')
+      setError(formatClientError(err))
     } finally {
       setPending(false)
     }
@@ -48,7 +71,7 @@ function SignInPage() {
         </p>
       </div>
 
-      <form className="space-y-4" onSubmit={onSubmit}>
+      <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -57,9 +80,13 @@ function SignInPage() {
             type="email"
             autoComplete="email"
             required
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
             placeholder="you@example.com"
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                void onContinue()
+              }
+            }}
           />
         </div>
         {error ? (
@@ -67,10 +94,16 @@ function SignInPage() {
             {error}
           </p>
         ) : null}
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button
+          type="button"
+          className="w-full"
+          disabled={!ready || pending}
+          data-ready={ready ? 'true' : 'false'}
+          onClick={onContinue}
+        >
           {pending ? 'Signing in…' : 'Continue'}
         </Button>
-      </form>
+      </div>
     </main>
   )
 }

@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 
-import { useForm } from '@tanstack/react-form'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 
 import { Button } from '#/components/ui/button.tsx'
@@ -34,62 +33,76 @@ function todayIsoDate() {
   return `${yyyy}-${mm}-${dd}`
 }
 
+function formatClientError(err: unknown): string {
+  if (!(err instanceof Error)) {
+    return 'Could not save transaction'
+  }
+  try {
+    const parsed = JSON.parse(err.message) as Array<{ message?: string }>
+    if (Array.isArray(parsed) && parsed[0]?.message) {
+      return parsed[0].message
+    }
+  } catch {
+    // not JSON
+  }
+  return err.message || 'Could not save transaction'
+}
+
 function AddPage() {
   const categories = Route.useLoaderData()
   const router = useRouter()
   const [type, setType] = useState<'expense' | 'income'>('expense')
+  const [categoryId, setCategoryId] = useState('')
   const [formError, setFormError] = useState<string | null>(null)
-  const [lastSaved, setLastSaved] = useState<string | null>(null)
+  const [pending, setPending] = useState(false)
 
   const defaultCategoryId = useMemo(
     () => categories.find((c) => c.name === 'Food')?.id ?? categories[0]?.id ?? '',
     [categories],
   )
 
-  const form = useForm({
-    defaultValues: {
-      amount: '',
-      categoryId: defaultCategoryId,
-      date: todayIsoDate(),
-      note: '',
-    },
-    onSubmit: async ({ value }) => {
-      setFormError(null)
-      setLastSaved(null)
-      try {
-        const amountPaise = parseInrToPaise(value.amount)
-        if (type === 'expense') {
-          if (!value.categoryId) {
-            throw new Error('Category is required for expenses')
-          }
-          const txn = await createExpenseFn({
-            data: {
-              amountPaise,
-              categoryId: value.categoryId,
-              date: value.date,
-              note: value.note || undefined,
-            },
-          })
-          setLastSaved(`Saved expense ${formatInr(txn.amountPaise)}`)
-        } else {
-          const txn = await createIncomeFn({
-            data: {
-              amountPaise,
-              date: value.date,
-              note: value.note || undefined,
-            },
-          })
-          setLastSaved(`Saved income ${formatInr(txn.amountPaise)}`)
+  const selectedCategoryId = categoryId || defaultCategoryId
+
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setFormError(null)
+    setPending(true)
+    const formData = new FormData(event.currentTarget)
+    const amount = String(formData.get('amount') ?? '')
+    const date = String(formData.get('date') ?? '')
+    const note = String(formData.get('note') ?? '')
+
+    try {
+      const amountPaise = parseInrToPaise(amount)
+      if (type === 'expense') {
+        if (!selectedCategoryId) {
+          throw new Error('Category is required for expenses')
         }
-        form.reset()
-        form.setFieldValue('categoryId', defaultCategoryId)
-        form.setFieldValue('date', todayIsoDate())
-        await router.navigate({ to: '/history' })
-      } catch (err) {
-        setFormError(err instanceof Error ? err.message : 'Could not save transaction')
+        const txn = await createExpenseFn({
+          data: {
+            amountPaise,
+            categoryId: selectedCategoryId,
+            date,
+            note: note || undefined,
+          },
+        })
+        void formatInr(txn.amountPaise)
+      } else {
+        await createIncomeFn({
+          data: {
+            amountPaise,
+            date,
+            note: note || undefined,
+          },
+        })
       }
-    },
-  })
+      await router.navigate({ to: '/history' })
+    } catch (err) {
+      setFormError(formatClientError(err))
+    } finally {
+      setPending(false)
+    }
+  }
 
   return (
     <section className="space-y-6">
@@ -117,110 +130,58 @@ function AddPage() {
         </Button>
       </div>
 
-      <form
-        className="space-y-4"
-        onSubmit={(event) => {
-          event.preventDefault()
-          event.stopPropagation()
-          void form.handleSubmit()
-        }}
-      >
-        <form.Field
-          name="amount"
-          children={(field) => (
-            <div className="space-y-2">
-              <Label htmlFor={field.name}>Amount (₹)</Label>
-              <Input
-                id={field.name}
-                inputMode="decimal"
-                placeholder="0.00"
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(event) => field.handleChange(event.target.value)}
-                required
-              />
-            </div>
-          )}
-        />
+      <form className="space-y-4" method="post" onSubmit={onSubmit}>
+        <div className="space-y-2">
+          <Label htmlFor="amount">Amount (₹)</Label>
+          <Input
+            id="amount"
+            name="amount"
+            inputMode="decimal"
+            placeholder="0.00"
+            required
+          />
+        </div>
 
         {type === 'expense' ? (
-          <form.Field
-            name="categoryId"
-            children={(field) => (
-              <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <Select
-                  value={field.state.value}
-                  onValueChange={(value) => field.handleChange(value ?? '')}
-                >
-                  <SelectTrigger id="category" className="w-full">
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          />
+          <div className="space-y-2">
+            <Label htmlFor="category">Category</Label>
+            <Select
+              value={selectedCategoryId}
+              onValueChange={(value) => setCategoryId(value ?? '')}
+            >
+              <SelectTrigger id="category" className="w-full">
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         ) : null}
 
-        <form.Field
-          name="date"
-          children={(field) => (
-            <div className="space-y-2">
-              <Label htmlFor={field.name}>Date</Label>
-              <Input
-                id={field.name}
-                type="date"
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(event) => field.handleChange(event.target.value)}
-                required
-              />
-            </div>
-          )}
-        />
+        <div className="space-y-2">
+          <Label htmlFor="date">Date</Label>
+          <Input id="date" name="date" type="date" defaultValue={todayIsoDate()} required />
+        </div>
 
-        <form.Field
-          name="note"
-          children={(field) => (
-            <div className="space-y-2">
-              <Label htmlFor={field.name}>Note (optional)</Label>
-              <Textarea
-                id={field.name}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(event) => field.handleChange(event.target.value)}
-                rows={3}
-              />
-            </div>
-          )}
-        />
+        <div className="space-y-2">
+          <Label htmlFor="note">Note (optional)</Label>
+          <Textarea id="note" name="note" rows={3} />
+        </div>
 
         {formError ? (
           <p className="text-sm text-destructive" role="alert">
             {formError}
           </p>
         ) : null}
-        {lastSaved ? (
-          <p className="text-sm text-muted-foreground" role="status">
-            {lastSaved}
-          </p>
-        ) : null}
 
-        <form.Subscribe
-          selector={(state) => state.isSubmitting}
-          children={(isSubmitting) => (
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving…' : `Save ${type}`}
-            </Button>
-          )}
-        />
+        <Button type="submit" className="w-full" disabled={pending}>
+          {pending ? 'Saving…' : `Save ${type}`}
+        </Button>
       </form>
     </section>
   )
