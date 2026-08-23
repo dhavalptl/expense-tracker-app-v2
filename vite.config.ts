@@ -9,7 +9,11 @@ import { nitro } from 'nitro/vite'
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
   plugins: [
-    nitro({ rollupConfig: { external: [/^@sentry\//] } }),
+    nitro({
+      rollupConfig: {
+        external: [/^@sentry\//, 'better-sqlite3'],
+      },
+    }),
     tailwindcss(),
     tanstackStart(),
     viteReact(),
