@@ -1,9 +1,10 @@
 import { randomUUID } from 'node:crypto'
 
-import { and, eq } from 'drizzle-orm'
+import { and, desc, eq, gte, like, lte, sql } from 'drizzle-orm'
 
 import type { AppDb } from '../db/index.ts'
 import { categories, transactions } from '../db/schema.ts'
+import type { HistorySearch } from './history-search.ts'
 
 export class TransactionError extends Error {
   constructor(message: string) {
@@ -37,6 +38,7 @@ export type CreateIncomeInput = {
 }
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+export const HISTORY_LIMIT = 100
 
 function assertAmountPaise(amountPaise: number) {
   if (!Number.isInteger(amountPaise) || amountPaise <= 0) {
@@ -116,4 +118,60 @@ export function createIncome(
   }
   db.insert(transactions).values(txn).run()
   return txn
+}
+
+export function listTransactions(
+  db: AppDb,
+  userId: string,
+  filters: HistorySearch,
+  limit: number = HISTORY_LIMIT,
+): Transaction[] {
+  const conditions = [eq(transactions.userId, userId)]
+
+  if (filters.type) {
+    conditions.push(eq(transactions.type, filters.type))
+  }
+  if (filters.categoryId) {
+    conditions.push(eq(transactions.categoryId, filters.categoryId))
+  }
+  if (filters.from) {
+    conditions.push(gte(transactions.date, filters.from))
+  }
+  if (filters.to) {
+    conditions.push(lte(transactions.date, filters.to))
+  }
+  if (filters.q) {
+    conditions.push(like(transactions.note, `%${filters.q}%`))
+  }
+
+  return db
+    .select()
+    .from(transactions)
+    .where(and(...conditions))
+    .orderBy(desc(transactions.date), desc(transactions.createdAt))
+    .limit(limit)
+    .all()
+}
+
+export function sumExpensesInRange(
+  db: AppDb,
+  userId: string,
+  from: string,
+  to: string,
+): number {
+  const row = db
+    .select({
+      total: sql<number>`coalesce(sum(${transactions.amountPaise}), 0)`,
+    })
+    .from(transactions)
+    .where(
+      and(
+        eq(transactions.userId, userId),
+        eq(transactions.type, 'expense'),
+        gte(transactions.date, from),
+        lte(transactions.date, to),
+      ),
+    )
+    .get()
+  return Number(row?.total ?? 0)
 }

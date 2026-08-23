@@ -4,7 +4,8 @@ import { z } from 'zod'
 
 import { requireSessionUser, SESSION_COOKIE } from '../auth/session.ts'
 import { getDb } from '../db/index.ts'
-import { createExpense, createIncome } from './transactions.ts'
+import { parseHistorySearch } from './history-search.ts'
+import { createExpense, createIncome, listTransactions } from './transactions.ts'
 
 function currentUser() {
   return requireSessionUser(getDb(), getCookie(SESSION_COOKIE))
@@ -23,6 +24,14 @@ const incomeInput = z.object({
   note: z.string().max(500).optional(),
 })
 
+const listInput = z.object({
+  q: z.string().optional(),
+  type: z.enum(['expense', 'income']).optional(),
+  categoryId: z.string().optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+})
+
 export const createExpenseFn = createServerFn({ method: 'POST' })
   .validator(expenseInput)
   .handler(async ({ data }) => {
@@ -35,4 +44,12 @@ export const createIncomeFn = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const user = currentUser()
     return createIncome(getDb(), user.id, data)
+  })
+
+export const listMyTransactions = createServerFn({ method: 'GET' })
+  .validator(listInput)
+  .handler(async ({ data }) => {
+    const user = currentUser()
+    const filters = parseHistorySearch(data)
+    return listTransactions(getDb(), user.id, filters)
   })

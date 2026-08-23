@@ -7,15 +7,15 @@
 User sets a **calendar-month total expense** cap (INR). `/budgets` shows progress and status `under` | `at` | `over`. Month range uses `Asia/Kolkata` via a single `currentMonthRange()` helper.
 
 ## Acceptance
-- [ ] Pure `budgetStatus(spentPaise, limitPaise)` with Vitest fixtures (independent expected status)
-- [ ] Upsert/read monthly budget server fns; spent = sum of expenses in current month
-- [ ] `/budgets` UI: set limit, show progress + status
-- [ ] Tests at seams: status rules; month range; authz
+- [x] Pure `budgetStatus(spentPaise, limitPaise)` with Vitest fixtures
+- [x] Upsert/read monthly budget server fns; spent = sum of expenses in current month
+- [x] `/budgets` UI: set limit, show progress + status
+- [x] Tests at seams: status rules; month range; overview aggregation
 
 ## Blocked by
-04 — Add transactions (needs expenses to compute spent; can stub spent in unit tests earlier)
+04 — Add transactions
 
 ## Verify
-- [ ] Focused Vitest for `budgetStatus` + month range fixtures
-- [ ] `npm run typecheck`
-- [ ] Manual: set limit; status matches known spend
+- [x] Focused Vitest for `budgetStatus` + month range + overview
+- [x] `npm run typecheck`
+- [x] `npm run build`
