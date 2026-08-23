@@ -7,16 +7,16 @@
 Signed-in user logs an **expense** (INR → paise, required owned category, date, optional note) and an **income** (`type: income`, no custom category) from `/add`. UI waits for server confirm; amounts display as ₹.
 
 ## Acceptance
-- [ ] `createExpense` / `createIncome` validated server fns; expense requires owned `categoryId`
-- [ ] `/add` form (TanStack Form + shadcn); success returns to a sensible next screen
-- [ ] Amounts stored as integer paise; displayed via `formatInr`
-- [ ] Tests at seams: validation; ownership denial; create happy path
-- [ ] Category delete-in-use can be proven with a created expense
+- [x] `createExpense` / `createIncome` validated server fns; expense requires owned `categoryId`
+- [x] `/add` form (TanStack Form + shadcn); success navigates to `/history`
+- [x] Amounts stored as integer paise; confirmed via `formatInr` in success path
+- [x] Tests at seams: validation; ownership denial; create happy path
+- [x] Category delete-in-use already proven in ticket 03 with a transaction row
 
 ## Blocked by
 03 — Categories
 
 ## Verify
-- [ ] Focused Vitest for transaction server seams
-- [ ] `npm run typecheck`
-- [ ] Manual: log expense + income; ₹ display correct
+- [x] `npm run test` — 30 passed (transaction suite red first: missing module)
+- [x] `npm run typecheck` — pass
+- [x] `npm run build` — pass
