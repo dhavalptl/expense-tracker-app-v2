@@ -12,12 +12,12 @@ Failed loads show full-page error + retry; empty states polished. Playwright cov
 - [x] One negative e2e case green (unauthenticated → `/sign-in`)
 - [x] `npm run build` green
 - [x] Ready for code-review + security-review
+- [x] Preview e2e sets `SESSION_SECRET` and does not reuse a local `dev` server (avoids false greens)
 
 ## Blocked by
 05 — History; 07 — Dashboard
 
 ## Verify
-- [x] `npm run test:e2e` — 2 passed
+- [x] `npm run test:e2e` — 2 passed (run twice after SESSION_SECRET fix)
 - [x] `npm run typecheck` — pass
 - [x] `npm run build` — pass
-- [x] `npm run test` — 43 passed
