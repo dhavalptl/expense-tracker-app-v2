@@ -7,16 +7,18 @@
 User types a unique email, gets an httpOnly signed session, lands in the app with a visible **dev auth** banner and bottom nav scaffolding. Unauthenticated visits to app routes go to `/sign-in`. Sign-out clears the session.
 
 ## Acceptance
-- [ ] `signInWithEmail` upserts user by email; sets signed httpOnly cookie (`SESSION_SECRET`)
-- [ ] `getSession` / `signOut` server seams; privileged paths require session
-- [ ] `/sign-in` UI; protected layout with banner + bottom nav (Home / Add / History / Budgets)
-- [ ] Tests at seams: sign-in upsert; authz denial without cookie
-- [ ] Banner copy states this is not production security
+- [x] `signInWithEmail` upserts user by email; sets signed httpOnly cookie (`SESSION_SECRET`)
+- [x] `getSession` / `signOut` / `requireSession` server seams; privileged paths require session
+- [x] `/sign-in` UI; protected `_authenticated` layout with banner + bottom nav (Home / Add / History / Budgets)
+- [x] Tests at seams: sign-in upsert; authz denial without cookie; seal/unseal
+- [x] Banner copy states this is not production security
 
 ## Blocked by
 01 — Foundation
 
 ## Verify
-- [ ] Focused Vitest for auth server seams
-- [ ] `npm run typecheck`
-- [ ] Manual: email → shell with banner
+- [x] `npm run test -- src/server/auth/session.test.ts` — 9 passed (red first: missing module)
+- [x] `npm run test` — 18 passed
+- [x] `npm run typecheck` — pass
+- [x] `npm run build` — pass
+- [ ] Manual browser smoke deferred (dev watcher hit EMFILE in this environment)
