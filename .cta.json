@@ -1,0 +1,17 @@
+{
+  "projectName": "expense-tracker-app-v2",
+  "mode": "file-router",
+  "typescript": true,
+  "tailwind": true,
+  "packageManager": "npm",
+  "git": true,
+  "install": true,
+  "intent": false,
+  "addOnOptions": {},
+  "projectPreset": "blank",
+  "includeExamples": false,
+  "routerOnly": false,
+  "version": 1,
+  "framework": "react",
+  "chosenAddOns": ["nitro", "eslint", "shadcn", "form"]
+}
