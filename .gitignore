@@ -12,5 +12,6 @@ dist-ssr
 __unconfig*
 todos.json
 data/
+backups/
 test-results/
 playwright-report/

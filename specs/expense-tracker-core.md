@@ -155,17 +155,31 @@ Client routes use `createFileRoute`, `#/components/ui/*`, and `cn` from `#/lib/u
 
 ## Success criteria
 
-- [ ] User can register/sign in with a unique email and receive a session; banner visible when authenticated
-- [ ] Unauthenticated access to app routes redirects to sign-in
-- [ ] New user gets seeded expense categories and can CRUD custom expense categories
-- [ ] User can create expense (category required) and income in INR; amounts stored as paise and displayed as ₹
-- [ ] History lists transactions; `q` / type / category / date-range filters work via URL search params
-- [ ] User can set a budget limit and see under/at/over consistent with fixture math
-- [ ] Dashboard shows this-month income total, expense total, net, spend-by-category, and budget progress
-- [ ] Empty states show CTAs; validation errors are inline; failed loads offer retry
-- [ ] Vitest covers money formatting and budget status rules at pure seams; server-fn tests cover authz denial and create/list happy paths with a fake or test DB
-- [ ] Playwright covers the critical happy path + one negative case
-- [ ] Typecheck + unit + build green for the slice that ships
+Original grilled drop (tickets 01–08):
+
+- [x] User can register/sign in with a unique email and receive a session; banner visible when authenticated
+- [x] Unauthenticated access to app routes redirects to sign-in
+- [x] New user gets seeded expense categories and can CRUD custom expense categories
+- [x] User can create expense (category required) and income in INR; amounts stored as paise and displayed as ₹
+- [x] History lists transactions; `q` / type / category / date-range filters work via URL search params
+- [x] User can set a budget limit and see under/at/over consistent with fixture math
+- [x] Dashboard shows this-month income total, expense total, net, spend-by-category, and budget progress
+- [x] Empty states show CTAs; validation errors are inline; failed loads offer retry
+- [x] Vitest covers money formatting and budget status rules at pure seams; domain/server tests cover authz denial and create/list happy paths with a test DB
+- [x] Playwright covers the critical happy path + one negative case
+- [x] Typecheck + unit + build green for the slice that ships
+
+## Post-drop addendum (not in original grill)
+
+Added after tickets 01–08 shipped, when preview/Nitro production runs needed real env + durable SQLite setup. **Not part of the original product requirements.**
+
+- [x] Production requires `SESSION_SECRET` (16+) and `DATABASE_PATH` on a writable persistent path; fail fast on boot
+- [x] `.env` / `.env.example` documented; `preview` / `start` load env via `node --env-file=.env`
+- [x] SQLite prod pragmas (WAL, foreign keys, busy_timeout) + write-probe of DB directory
+- [x] `npm run db:backup` online backup script; README production checklist
+- [x] Playwright preview e2e sets `SESSION_SECRET` + `DATABASE_PATH` and does not reuse a local `dev` server
+
+Tracked as local ticket **09** (see `tasks/todo.md`).
 
 ## Open questions
 
@@ -175,4 +189,3 @@ Resolved in `tasks/plan.md` (approved defaults):
 2. SQLite: **Drizzle + better-sqlite3** (ask before install).
 3. Session: **signed httpOnly cookie** (HMAC + `SESSION_SECRET`).
 4. Seed categories: Food, Transport, Housing, Shopping, Utilities, Health, Other.
-)

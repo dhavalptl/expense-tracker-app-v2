@@ -101,9 +101,22 @@ Ordered; each is demoable. Prefactors first.
 - After **Slice 5–6:** typecheck + Vitest; human OK on dashboard/budget numbers.
 - After **Slice 7:** Playwright + build; code-review + security-review; draft PR linking `specs/expense-tracker-core.md` and parent issue.
 
+## Post-drop addendum (ops / not original scope)
+
+After Slice 7, preview/Nitro (`NODE_ENV=production`) failed without env, and SQLite needed an explicit prod path. This was **not** in the grilled product drop; treat as ops hardening:
+
+| Decision | Rationale |
+| --- | --- |
+| Require `SESSION_SECRET` + `DATABASE_PATH` in production | Fail fast; no insecure defaults / accidental cwd DB on prod |
+| Write-probe DB directory + WAL/`busy_timeout` | Catch read-only volumes early; single-node durable file SQLite |
+| `npm run db:backup` | Online backup without stopping the server |
+| `preview`/`start` use `--env-file=.env` | Local production-like runs load secrets without platform env |
+
+Ticket: **09** in `tasks/todo.md` / `.scratch/.../09-sqlite-prod-env.md`.
+
 ## Parent tracking
 
-- Spec: `specs/expense-tracker-core.md`
+- Spec: `specs/expense-tracker-core.md` (includes post-drop addendum)
 - Tickets index: `tasks/todo.md`
-- Bodies: `.scratch/expense-tracker-core/issues/01`–`08`
+- Bodies: `.scratch/expense-tracker-core/issues/01`–`09`
 - No GitHub parent issue (local tracking only)

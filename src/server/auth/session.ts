@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm'
 import type { AppDb } from '../db/index.ts'
 import { users } from '../db/schema.ts'
 import { seedDefaultCategories } from '../categories/categories.ts'
+import { requireSessionSecret } from '../env.ts'
 
 export const SESSION_COOKIE = 'expense_session'
 export const DEFAULT_SESSION_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 30 // 30 days
@@ -23,14 +24,7 @@ export type SessionUser = {
 }
 
 function getSessionSecret(): string {
-  const secret = process.env.SESSION_SECRET
-  if (secret && secret.length >= 16) {
-    return secret
-  }
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('SESSION_SECRET must be set to a long random string in production')
-  }
-  return 'dev-insecure-session-secret'
+  return requireSessionSecret()
 }
 
 function sign(payload: string): string {

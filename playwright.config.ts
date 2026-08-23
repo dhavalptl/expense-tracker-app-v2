@@ -1,3 +1,5 @@
+import path from 'node:path'
+
 import { defineConfig, devices } from '@playwright/test'
 
 const isCI = !!process.env.CI
@@ -22,7 +24,7 @@ export default defineConfig({
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    command: 'npm run build && npm run preview -- --host 127.0.0.1 --port 3000',
+    command: 'npm run build && npm run preview',
     url: 'http://127.0.0.1:3000',
     // Do not reuse a local `dev` server — it hides production SESSION_SECRET failures.
     reuseExistingServer: false,
@@ -30,6 +32,9 @@ export default defineConfig({
     env: {
       ...process.env,
       SESSION_SECRET: e2eSessionSecret,
+      DATABASE_PATH:
+        process.env.DATABASE_PATH?.trim() ||
+        path.join(process.cwd(), 'data', 'e2e-app.sqlite'),
     },
   },
 })
