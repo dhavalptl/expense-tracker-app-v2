@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm'
 
 import type { AppDb } from '../db/index.ts'
 import { users } from '../db/schema.ts'
+import { seedDefaultCategories } from '../categories/categories.ts'
 
 export const SESSION_COOKIE = 'expense_session'
 export const DEFAULT_SESSION_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 30 // 30 days
@@ -104,6 +105,7 @@ export function upsertUserByEmail(db: AppDb, email: string): SessionUser {
     createdAt: new Date(),
   }
   db.insert(users).values(user).run()
+  seedDefaultCategories(db, user.id)
   return user
 }
 

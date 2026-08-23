@@ -14,6 +14,7 @@ import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedAddRouteImport } from './routes/_authenticated/add'
 import { Route as AuthenticatedBudgetsRouteImport } from './routes/_authenticated/budgets'
+import { Route as AuthenticatedCategoriesRouteImport } from './routes/_authenticated/categories'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -40,6 +41,11 @@ const AuthenticatedBudgetsRoute = AuthenticatedBudgetsRouteImport.update({
   path: '/budgets',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedCategoriesRoute = AuthenticatedCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedHistoryRoute = AuthenticatedHistoryRouteImport.update({
   id: '/history',
   path: '/history',
@@ -51,12 +57,14 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof SignInRoute
   '/add': typeof AuthenticatedAddRoute
   '/budgets': typeof AuthenticatedBudgetsRoute
+  '/categories': typeof AuthenticatedCategoriesRoute
   '/history': typeof AuthenticatedHistoryRoute
 }
 export interface FileRoutesByTo {
   '/sign-in': typeof SignInRoute
   '/add': typeof AuthenticatedAddRoute
   '/budgets': typeof AuthenticatedBudgetsRoute
+  '/categories': typeof AuthenticatedCategoriesRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/': typeof AuthenticatedIndexRoute
 }
@@ -66,20 +74,22 @@ export interface FileRoutesById {
   '/sign-in': typeof SignInRoute
   '/_authenticated/add': typeof AuthenticatedAddRoute
   '/_authenticated/budgets': typeof AuthenticatedBudgetsRoute
+  '/_authenticated/categories': typeof AuthenticatedCategoriesRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sign-in' | '/add' | '/budgets' | '/history'
+  fullPaths: '/' | '/sign-in' | '/add' | '/budgets' | '/categories' | '/history'
   fileRoutesByTo: FileRoutesByTo
-  to: '/sign-in' | '/add' | '/budgets' | '/history' | '/'
+  to: '/sign-in' | '/add' | '/budgets' | '/categories' | '/history' | '/'
   id:
     | '__root__'
     | '/_authenticated'
     | '/sign-in'
     | '/_authenticated/add'
     | '/_authenticated/budgets'
+    | '/_authenticated/categories'
     | '/_authenticated/history'
     | '/_authenticated/'
   fileRoutesById: FileRoutesById
@@ -126,6 +136,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBudgetsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/categories': {
+      id: '/_authenticated/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof AuthenticatedCategoriesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/history': {
       id: '/_authenticated/history'
       path: '/history'
@@ -139,6 +156,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteChildren {
   AuthenticatedAddRoute: typeof AuthenticatedAddRoute
   AuthenticatedBudgetsRoute: typeof AuthenticatedBudgetsRoute
+  AuthenticatedCategoriesRoute: typeof AuthenticatedCategoriesRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
@@ -146,6 +164,7 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAddRoute: AuthenticatedAddRoute,
   AuthenticatedBudgetsRoute: AuthenticatedBudgetsRoute,
+  AuthenticatedCategoriesRoute: AuthenticatedCategoriesRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
