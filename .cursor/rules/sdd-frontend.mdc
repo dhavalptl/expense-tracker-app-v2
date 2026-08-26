@@ -1,0 +1,6 @@
+---
+description: Token-cheap SDD routing. Load one phase skill; delegate role agents.
+alwaysApply: true
+---
+
+Follow `AGENTS.md`. One phase skill per turn. Do not load the whole pack. Feature work starts at `sdd-orchestrator`.
